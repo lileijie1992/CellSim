@@ -1,0 +1,3 @@
+cell,mesenchymal stem cell
+stem cell,precursor cell
+native cell,somatic stem cell
