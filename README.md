@@ -9,14 +9,12 @@ As an outstanding software, CellSim (Cell Similarity) can provide following serv
 Visite website for a detailed introduction:www.cellsim.nwsuaflmz.com
 
 ## Installation Instructions
-<p>There are two way to run CellSim. First one is to run code in python3 (3.5 is better). Pyqt5(5.8.1) and matplotlib(2.0.0) should be installed.</p>
-
+There are two way to run CellSim:<br>
+First one is to run code in python3 (3.5 is better). Pyqt5(5.8.1) and matplotlib(2.0.0) should be installed.<br>
 <b>Install pyqt5:</b><br>
 $ sudo pip3 install pyqt5<br>
-
 <b>Install matplotlib:</b><br>
 $ sudu pip3 install matplotlib<br>
-
 <b>Run CellSim:</b><br>
 $ python3 CellSim.pyw<br>
 <br>
