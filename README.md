@@ -20,4 +20,4 @@ $ sudu pip3 install matplotlib<br>
 <b>Run CellSim:</b><br>
 $ python3 CellSim.pyw<br>
 <br>
-Or just click executable files in download archive files on the website (as noted above).
+<b>Or just click executable files in download archive files on the website (as noted above).</b>
