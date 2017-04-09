@@ -11,11 +11,11 @@ Visite website for a detailed introduction:www.cellsim.nwsuaflmz.com
 ## Installation Instructions
 There are two way to run CellSim:<br>
 First one is to run code in python3 (3.5 is better). Pyqt5(5.8.1) and matplotlib(2.0.0) should be installed.<br>
-<b>Install pyqt5:</b><br>
-$ sudo pip3 install pyqt5<br>
-<b>Install matplotlib:</b><br>
-$ sudu pip3 install matplotlib<br>
-<b>Run CellSim:</b><br>
-$ python3 CellSim.pyw<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<b>Install pyqt5:</b><br>
+&nbsp;&nbsp;&nbsp;&nbsp;$ sudo pip3 install pyqt5<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<b>Install matplotlib:</b><br>
+&nbsp;&nbsp;&nbsp;&nbsp;$ sudu pip3 install matplotlib<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<b>Run CellSim:</b><br>
+&nbsp;&nbsp;&nbsp;&nbsp;$ python3 CellSim.pyw<br>
 <br>
-<b>Or just click executable files in download archive files on the website (as noted above).</b>
+The other is to click executable files in download archive files on the website (as noted above).
