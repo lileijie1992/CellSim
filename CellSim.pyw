@@ -11,12 +11,14 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 import loadfiledlg
 import figuretooldlg
+import helpform
 import qrc_resource
-__version__ = "2.0.1"
+
+__version__ = "2.1.1"
 
 
 class MainWindow(QMainWindow):
-    global normalcellnet,normalcellname,cancercellnet,cancercellname
+    global normalcellnet, normalcellname, cancercellnet, cancercellname
     normalcellnet = []
     normalcellname = []
     netlists = os.listdir("./data/net/fantom_allunique_normal_genelist/")
@@ -57,6 +59,8 @@ class MainWindow(QMainWindow):
         self.genebutton1 = QPushButton("Normal Cell calculate")
         self.genebutton2 = QPushButton("Cancer Cell calculate")
         self.imagelabel = QLabel()
+        self.imagelabel2 = QScrollArea()
+        self.imagelabel2.setWidget(self.imagelabel)
         self.table = QTableWidget(1001, 4)
         self.table.setMouseTracking(True)
         self.table.setHorizontalHeaderLabels(['Celltype A', 'Celltype B', 'Simlarity', 'Common network'])
@@ -65,15 +69,15 @@ class MainWindow(QMainWindow):
         self.table.setEditTriggers(QAbstractItemView.NoEditTriggers)
         self.tab = QTabWidget()
         self.tab.setMovable(False)
-        self.tab.setTabsClosable(False)
+        self.tab.setTabsClosable(True)
         # signals connect slot
         self.button.clicked.connect(self.Search)
         self.genebutton1.clicked.connect(lambda: self.geneSearch(1))
         self.genebutton2.clicked.connect(lambda: self.geneSearch(2))
         self.line1.returnPressed.connect(self.button.click)
         self.line2.returnPressed.connect(self.button.click)
+        self.tab.tabCloseRequested.connect(self.tabchange)
         self.tab.tabCloseRequested.connect(self.tab.removeTab)
-        self.tab.tabBarDoubleClicked.connect(self.tab.removeTab)
 
         self.setCentralWidget(self.tab)
         self.setWindowIcon(QIcon(":/icon.png"))
@@ -88,6 +92,7 @@ class MainWindow(QMainWindow):
         self.anglesdic = {'a': 2}
         self.datadic = {'a': 2}
         self.xaxislabeldic = {'a': 2}
+        self.removenum = 0
         self.logDockWidget = QDockWidget()
         self.filename = None
 
@@ -118,7 +123,7 @@ class MainWindow(QMainWindow):
                                                 self.fileSaveImage,
                                                 icon="filesavep",
                                                 tip="Save the Figure")
-        fileQuitAction = self.createAction("&Quit",  # 退出
+        fileQuitAction = self.createAction("&Quit",
                                            self.close,
                                            "Ctrl+Q",
                                            "filequit",
@@ -130,6 +135,9 @@ class MainWindow(QMainWindow):
         figuretoolAction = self.createAction('&Figure tool',
                                              self.figuretool,
                                              icon="figuretool")
+        clearupAction = self.createAction('&Clear up',
+                                          self.clearup,
+                                          icon="clearup")
         helpAboutAction = self.createAction("&About CelltypeSim",
                                             self.helpAbout,
                                             icon="about")
@@ -148,17 +156,21 @@ class MainWindow(QMainWindow):
         self.demoMenu.addActions((demoaAction, demobAction))
         self.FTMenu = self.menuBar().addMenu("&Tool")
         self.FTMenu.addAction(figuretoolAction)
+        self.FTMenu.addAction(clearupAction)
         self.helpMenu = self.menuBar().addMenu("&Help")
         self.helpMenu.addActions((helpAboutAction,
                                   helpHelpAction))
 
         # Tool Bar
         fileToolBar = self.addToolBar("File")
+        fileToolBar.setFloatable(False)
         fileToolBar.setObjectName("FileToolBar")
         fileToolBar.addActions((fileOpenAction,
                                 fileSaveAsAction,
-                                figuretoolAction))
+                                figuretoolAction,
+                                clearupAction))
         searchToolBar = self.addToolBar("Search")
+        searchToolBar.setFloatable(False)
         searchToolBar.setObjectName("SearchToolBar")
         searchToolBar.addWidget(self.label1)
         searchToolBar.addWidget(self.line1)
@@ -166,13 +178,14 @@ class MainWindow(QMainWindow):
         searchToolBar.addWidget(self.line2)
         searchToolBar.addWidget(self.button)
         genesearchTooBar = self.addToolBar("Gene")
+        genesearchTooBar.setFloatable(False)
         genesearchTooBar.setObjectName("GenesearchToolBar")
         genesearchTooBar.addWidget(self.genelabel)
         genesearchTooBar.addWidget(self.geneline)
         genesearchTooBar.addWidget(self.genebutton1)
         genesearchTooBar.addWidget(QLabel(' '))
         genesearchTooBar.addWidget(self.genebutton2)
-        self.tab.addTab(self.imagelabel, 'Cells_Similarity')
+        self.tab.addTab(self.imagelabel2, 'Cells_Similarity')
         self.setMinimumSize(1000, 600)
         self.showImage()
 
@@ -201,7 +214,7 @@ class MainWindow(QMainWindow):
             try:
                 if type(current) is QTableWidget:
                     f = open(fname, "w")
-                    f.writelines(",".join(['Celltype A', 'Celltype B', 'Simlarity', 'Common network'])+'\n')
+                    f.writelines(",".join(['Celltype A', 'Celltype B', 'Simlarity', 'Common network']) + '\n')
                     for i in range(current.rowCount()):
                         sign = []
                         if current.item(i, 0):
@@ -308,6 +321,34 @@ class MainWindow(QMainWindow):
         except:
             traceback.print_exc()
 
+    def clearup(self):
+        self.canvasdic = {'a': 2}
+        self.axdic = {'a': 2}
+        self.testlinedic = {'a': 2}
+        self.anglesdic = {'a': 2}
+        self.datadic = {'a': 2}
+        self.xaxislabeldic = {'a': 2}
+        self.line1.clear()
+        self.line2.clear()
+        self.geneline.clear()
+        self.tab.clear()
+        self.removenum = 0
+
+    def tabchange(self, rm_index):
+        try:
+            for i in range((rm_index+1)*2, (self.tab.count())*2):
+                sign = 'c' + str(i)
+                sign2 = 'c' + str(i-2)
+                self.canvasdic[sign2] = self.canvasdic[sign]
+                self.axdic[sign2] = self.axdic[sign]
+                self.testlinedic[sign2] = self.testlinedic[sign]
+                self.anglesdic[sign2] = self.anglesdic[sign]
+                self.datadic[sign2] = self.datadic[sign]
+                self.xaxislabeldic[sign2] = self.xaxislabeldic[sign]
+        except:
+            traceback.print_exc()
+        self.removenum += 1
+
     def FTchangetitlea(self, a):
         sign2 = 'c' + str(int(self.tab.currentIndex()) * 2 + int(self.May.chooseabfunction()) - 1)
         try:
@@ -364,7 +405,7 @@ class MainWindow(QMainWindow):
     def FTsetxaxislabel(self, index, text):
         sign2 = 'c' + str(int(self.tab.currentIndex()) * 2 + int(self.May.chooseabfunction()) - 1)
         try:
-            self.xaxislabeldic[sign2][index-1] = text
+            self.xaxislabeldic[sign2][index - 1] = text
             self.axdic[sign2].set_xticklabels(self.xaxislabeldic[sign2])
             self.canvasdic[sign2].draw()
         except:
@@ -373,7 +414,7 @@ class MainWindow(QMainWindow):
     def FTselect(self, index):
         sign2 = 'c' + str(int(self.tab.currentIndex()) * 2 + int(self.May.chooseabfunction()) - 1)
         try:
-            _text = self.xaxislabeldic[sign2][index-1]
+            _text = self.xaxislabeldic[sign2][index - 1]
             self.May.xaxis_selection(_text)
         except:
             pass
@@ -405,7 +446,7 @@ class MainWindow(QMainWindow):
                     self.sign.setItem(k, 3, item2)
         self.sign.resizeColumnsToContents()
         self.sign.setSortingEnabled(True)
-        self.tab.addTab(self.sign, '{} Cells_Similarity'.format(self.tab.count()))
+        self.tab.addTab(self.sign, '{} Cells_Similarity'.format(self.tab.count() + self.removenum))
         self.tab.setCurrentWidget(self.sign)
         self.sign.cellDoubleClicked.connect(self.myslot)
 
@@ -453,17 +494,17 @@ class MainWindow(QMainWindow):
                 for line in lines:
                     line = line.strip('\n')
                     L = line.split(' ')
-                    net1dic[L[0]+L[1]] = L[2]
+                    net1dic[L[0] + L[1]] = L[2]
                 f = open('./data/normalcell/normalcellcommon_withweight/' + _str2, "r")
                 lines = f.readlines()
                 f.close()
                 for line in lines:
                     line = line.strip('\n')
                     L = line.split(' ')
-                    together = L[0]+L[1]
+                    together = L[0] + L[1]
                     try:
                         _num = net1dic[together]
-                        net.append([L[0], L[1], (float(_num) + float(L[2]))/2])
+                        net.append([L[0], L[1], (float(_num) + float(L[2])) / 2])
                     except:
                         pass
             self.logtable = QTableWidget(10000, 3)
@@ -472,7 +513,7 @@ class MainWindow(QMainWindow):
             self.logtable.setSortingEnabled(False)
             self.logtable.setMouseTracking(True)
             for i in range(0, min(len(net), 10000)):
-                net[i+1][2] = float('%0.4f' % float(net[i+1][2]))
+                net[i + 1][2] = float('%0.4f' % float(net[i + 1][2]))
                 for j in range(0, 3):
                     item = QTableWidgetItem(str(net[i + 1][j]))
                     self.logtable.setItem(i, j, item)
@@ -520,7 +561,8 @@ class MainWindow(QMainWindow):
             self.mapb = self.RDshow(radaralldata, 1, self.tab.count())
             self.genetable = QTableWidget(400, 3)
             self.genetable.setMaximumWidth(1000)
-            self.genetable.setHorizontalHeaderLabels(['Percent of Cell Type', 'Percent of Query Gene list', 'Cell Type'])
+            self.genetable.setHorizontalHeaderLabels(
+                ['Percent of Cell Type', 'Percent of Query Gene list', 'Cell Type'])
             self.genetable.setSortingEnabled(False)
             self.genetable.setEditTriggers(QAbstractItemView.NoEditTriggers)
             for i in range(0, len(radaralldata)):
@@ -542,7 +584,7 @@ class MainWindow(QMainWindow):
             l = QHBoxLayout(self.main_widget)
             l.addWidget(self.mainmap_widget)
             l.addWidget(self.genetable)
-            self.tab.addTab(self.main_widget, '{} '.format(self.tab.count()) + titlename)
+            self.tab.addTab(self.main_widget, '{} '.format(self.tab.count() + self.removenum) + titlename)
             self.tab.setCurrentWidget(self.main_widget)
         except:
             traceback.print_exc()
@@ -578,20 +620,20 @@ class MainWindow(QMainWindow):
             self.testline = list(range(6))
             if data[0] == 1:
                 self.testline[0] = pyplot.text(angles[0], data[0], '%0.2f' % data[0], ha='right', va='top', fontsize=8,
-                                            fontproperties="Times New RoMan")
+                                               fontproperties="Times New RoMan")
             else:
                 self.testline[0] = pyplot.text(angles[0], data[0], '%0.2f' % data[0], ha='left', va='top', fontsize=8,
-                                            fontproperties="Times New RoMan")
+                                               fontproperties="Times New RoMan")
             self.testline[3] = pyplot.text(angles[3], data[3] + 0.05, '%0.2f' % data[3], ha='right', va='center',
-                                        fontsize=8, fontproperties="Times New RoMan")
+                                           fontsize=8, fontproperties="Times New RoMan")
             self.testline[4] = pyplot.text(angles[4], data[4] + 0.05, '%0.2f' % data[4], ha='center', va='top',
-                                        fontsize=8, fontproperties="Times New RoMan")
+                                           fontsize=8, fontproperties="Times New RoMan")
             self.testline[5] = pyplot.text(angles[5], data[5] + 0.05, '%0.2f' % data[5], ha='left', va='top',
-                                        fontsize=8, fontproperties="Times New RoMan")
+                                           fontsize=8, fontproperties="Times New RoMan")
             for a in [1, 2]:
                 if float('%0.2f' % data[a]) != 0:
                     self.testline[a] = pyplot.text(angles[a], data[a] + 0.05, s='%0.2f' % data[a], ha='center',
-                                                va='bottom', fontsize=8, fontproperties="Times New RoMan")
+                                                   va='bottom', fontsize=8, fontproperties="Times New RoMan")
             self.testlinedic[sign] = self.testline
             self.anglesdic[sign] = angles
             self.datadic[sign] = data
@@ -717,14 +759,8 @@ class MainWindow(QMainWindow):
                               platform.system()))
 
     def helpHelp(self):
-        QMessageBox.about(self, "CellSim Help",
-                          """<p>&nbsp; &nbsp;The <b>Cellsim</b> program provides cell type similarity calculation.</p>
-                             <p>&nbsp; &nbsp;The <font color="#0000FF">File</font> menu is used to load files and save current data
-                              (including the similarity between cell types, common networks, and figures).</p>
-                             <p>&nbsp; &nbsp;The <font color="#0000FF">Demo</font> menu offers two demos.</p>
-                             <p>&nbsp; &nbsp;The <font color="#0000FF">Tool</font> menu offers a tool to edit the figure.</p>
-                             <p>&nbsp; &nbsp;All the most commonly used functions are also available on the
-                             toolbar. The toolbar provides an easy way of similarity calculation.</p>""")
+        form = helpform.HelpForm("index.html", self)
+        form.show()
 
     def showImage(self):
         d = QApplication.desktop()
@@ -739,6 +775,7 @@ class MainWindow(QMainWindow):
         height = image.height()
         image2 = image.scaled(width, height, Qt.KeepAspectRatio)
         self.imagelabel.setPixmap(QPixmap.fromImage(image2))
+        self.imagelabel.resize(QSize(image.width(), image.height()));
 
     def getdata(self):
         data = [1]
